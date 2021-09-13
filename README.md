@@ -1,3 +1,3 @@
-## Boilermaker Opensource Wifi Strength E-Record 
+# Boilermaker Wifi Strength Report 
 
-Purdue wifi sucks some of the time, all of the time. use this to check where you can get good wifi.
+Purdue wifi sucks some of the time, all the time. Check this to find all the cheeky high speed hotspots.
