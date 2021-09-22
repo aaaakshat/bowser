@@ -4,23 +4,40 @@ import re
 import os
 import time
 
-# Interface with macOS airport util 
+# Interface with macOS airport util
 
 AIRPORT_PATH = [os.environ.get(
-    'AIRPORT_PATH', 
+    'AIRPORT_PATH',
     '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport')]
 
-def gen_cmd(args):
-    return AIRPORT_PATH + args 
 
-def get_info(args):
-    process = subprocess.Popen(gen_cmd(args), stdout=subprocess.PIPE)
+def call_cmd(*args):
+    process = subprocess.Popen(
+        args, stdout=subprocess.PIPE)
     out, _ = process.communicate()
     process.wait()
-    return out 
+    return out
+
 
 def split_lines(lines, start=0):
     return lines.split('\n')[start:]
+
+
+def reformat_scan_results(results):
+    def reformat_scan_result_line(result):
+        try:
+            result = re.split('\s+', result)
+            node_args = (result[1:5] + [True if result[5] == 'Y' else False, ] +
+                         [result[6] if result[6] != '--' else None] +
+                         [' '.join(result[7:]).strip()])
+        except IndexError:
+            pass
+        else:
+            return datatypes.NodeResult(*node_args)
+
+    results_in_lines = split_lines(results, start=1)
+    return filter(None, map(reformat_scan_result_line, results_in_lines))
+
 
 def reformat_info_result(result):
     def reformat_info_result_line(line):
@@ -31,13 +48,10 @@ def reformat_info_result(result):
     info_args = map(reformat_info_result_line, results_in_lines)
     return datatypes.InfoResult(*info_args)
 
-def main():
-    while True:
-        a = (get_info(['-I']))
-        print(reformat_info_result(a))
-        time.sleep(1)
 
+def build_airport_cmd(params):
+    return AIRPORT_PATH + params
 
-main()
-
-
+c = build_airport_cmd(params=['-I'])
+a = (call_cmd(*c))
+print(reformat_info_result(a))
