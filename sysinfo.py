@@ -2,4 +2,5 @@
 
 
 def main():
-    
+    print("info")
+
